@@ -1,0 +1,6 @@
+opencv-python
+transformers
+supervision
+pyrealsense2
+matplotlib
+tqdm

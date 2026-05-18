@@ -1,0 +1,31 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run main demo (OpenCV camera)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--source",
+                "opencv",
+                "--camera",
+                "0"
+            ],
+            "justMyCode": false
+        },
+        {
+            "name": "Run main demo (RealSense)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--source",
+                "realsense"
+            ],
+            "justMyCode": false
+        }
+    ]
+}
