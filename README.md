@@ -1,11 +1,33 @@
-# Grounded SAM2 Windows RealSense Demo
+# Grounded SAM2 RealSense 3D Coordinate Demo for Windows
 
 This repository is a Windows-adapted camera demo built on GroundingDINO and
 SAM2. It provides live text-prompted detection, segmentation, continuous object
-IDs, and 3D coordinate estimation from an Intel RealSense depth camera.
+IDs, and per-object 3D coordinate estimation from an Intel RealSense depth
+camera.
+
+The main difference from a normal Grounded SAM2 camera demo is that this version
+uses RealSense depth to estimate and display each tracked object's `(X, Y, Z)`
+coordinate in meters.
+
+## Upstream Projects and Credits
+
+This repository is an engineering adaptation built from the following open
+source projects:
+
+- Grounded SAM 2 by IDEA-Research:
+  <https://github.com/IDEA-Research/Grounded-SAM-2>
+- SAM 2 by Meta:
+  <https://github.com/facebookresearch/sam2>
+- GroundingDINO by IDEA-Research:
+  <https://github.com/IDEA-Research/GroundingDINO>
 
 The original upstream Grounded SAM2 / SAM2 README content has been removed from
-this fork so this README focuses only on this Windows RealSense version.
+this fork so this README focuses only on this Windows RealSense 3D-coordinate
+version. The original licenses are kept in this repository:
+
+- `LICENSE`
+- `LICENSE_sam2`
+- `LICENSE_groundingdino`
 
 ## Important: This Repo Does Not Run Immediately After Clone
 
