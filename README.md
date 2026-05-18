@@ -7,6 +7,29 @@ IDs, and 3D coordinate estimation from an Intel RealSense depth camera.
 The original upstream Grounded SAM2 / SAM2 README content has been removed from
 this fork so this README focuses only on this Windows RealSense version.
 
+## Important: This Repo Does Not Run Immediately After Clone
+
+This repository does not include the SAM2 checkpoint file:
+
+```text
+checkpoints/sam2.1_hiera_large.pt
+```
+
+That file is about 900 MB, so it is intentionally ignored by Git. If you clone
+this repository and run `main.py` without downloading the checkpoint first, the
+program will fail when SAM2 tries to load the missing model file.
+
+You must do all of the following before running:
+
+1. Create the conda environment.
+2. Install PyTorch and the Windows dependencies.
+3. Download `sam2.1_hiera_large.pt`.
+4. Place it under `checkpoints/`.
+5. Connect a RealSense D455, or use OpenCV camera mode.
+
+This is normal for model-based computer vision projects. The code is in Git; the
+large model weight must be downloaded separately.
+
 ## What This Version Changes
 
 - Renamed the main entry point to `main.py`.
@@ -23,6 +46,119 @@ this fork so this README focuses only on this Windows RealSense version.
   cache files.
 - Guarded CUDA setup so importing the tracking module is less fragile on
   Windows.
+
+## Ubuntu to Windows Porting Notes
+
+The original demo worked more naturally on Ubuntu because the typical Linux
+setup has a simpler CUDA/Python/camera stack for these research projects. Moving
+the same code to Windows exposed several practical migration issues.
+
+### 1. Python Environment Confusion
+
+On Windows, VS Code and PowerShell can easily use different Python interpreters.
+For example, VS Code may show the correct conda environment while the terminal
+still runs a system Python such as:
+
+```text
+C:/Users/<user>/AppData/Local/Programs/Python/Python39/python.exe
+```
+
+This caused missing-module errors such as:
+
+```text
+ModuleNotFoundError: No module named 'cv2'
+ModuleNotFoundError: No module named 'hydra'
+```
+
+The fix is to run with the conda environment explicitly:
+
+```powershell
+E:\anaconda3\envs\dinosam2\python.exe main.py --source realsense
+```
+
+or ensure VS Code is using:
+
+```text
+E:\anaconda3\envs\dinosam2\python.exe
+```
+
+### 2. Linux V4L2 Camera Backend Does Not Work on Windows
+
+The earlier camera opening code used:
+
+```python
+cv2.CAP_V4L2
+```
+
+That backend is for Linux. On Windows it can fail or behave inconsistently. This
+version now tries Windows-friendly backends:
+
+```python
+cv2.CAP_DSHOW
+cv2.CAP_MSMF
+cv2.CAP_ANY
+```
+
+This matters mostly for the OpenCV fallback camera mode.
+
+### 3. RealSense Requires the Windows SDK Path to Work
+
+The project uses `pyrealsense2`. On Windows, the RealSense driver stack and
+Python package must both work. This version was tested with:
+
+```text
+Intel RealSense D455
+pyrealsense2
+Windows
+```
+
+Before running the full model, it is useful to confirm that the camera is
+visible:
+
+```powershell
+python -c "import pyrealsense2 as rs; print(len(rs.context().query_devices()))"
+```
+
+### 4. CUDA Import and Runtime Are More Fragile on Windows
+
+The original tracking module configured CUDA autocast immediately at import
+time. This is brittle on Windows, especially when debugging environment issues.
+This version checks CUDA availability before enabling CUDA-specific setup.
+
+The model still expects a CUDA GPU for practical speed. CPU mode is not the
+target path for this demo.
+
+### 5. Large Checkpoints Are Not Stored in Git
+
+The local development folder contains:
+
+```text
+checkpoints/sam2.1_hiera_large.pt
+```
+
+but GitHub does not. This is intentional. The `.gitignore` file excludes:
+
+```text
+checkpoints/*.pt
+checkpoints/*.pth
+```
+
+Without this rule, the repository would become very large and GitHub may reject
+the file because normal GitHub repositories do not handle large binary model
+weights well.
+
+### 6. Performance Differs Greatly from a High-End Ubuntu GPU
+
+The demo can run on an RTX 3060 Laptop GPU, but it is much slower than a high-end
+Ubuntu workstation with an RTX 4090 or RTX 5090. SAM2 large plus GroundingDINO
+is heavy, and RealSense depth processing adds extra overhead.
+
+For Windows laptops, lower resolution and lower detection frequency are often
+needed:
+
+```powershell
+python main.py --source realsense --width 424 --height 240 --fps 15 --detection-interval 60
+```
 
 ## Supported Cameras
 
@@ -262,11 +398,15 @@ python -m pip install --no-build-isolation -e . -r requirements-windows.txt
 ## Model Checkpoint
 
 The SAM2 `.pt` checkpoint is not committed to this repository because it is
-large. The default code expects:
+large. After cloning this repository, the checkpoint directory only contains the
+download script. The default code expects this exact file path:
 
 ```text
 checkpoints/sam2.1_hiera_large.pt
 ```
+
+If this file is missing, the repository is installed correctly but the demo is
+not ready to run yet.
 
 Download it from the official Meta public file server:
 
@@ -289,6 +429,9 @@ bash download_ckpts.sh
 
 The script downloads several SAM2.1 checkpoints. This demo uses the large
 checkpoint by default.
+
+Do not rename the file unless you also update the `sam2_ckpt_path` argument in
+the code.
 
 ## Run
 
