@@ -1,4 +1,4 @@
-# Grounded SAM2 RealSense 3D Coordinate Demo for Windows
+# Grounded SAM2 RealSense 3D Coordinate Demo for Windows.
 
 This repository is a Windows-adapted camera demo built on GroundingDINO and
 SAM2. It provides live text-prompted detection, segmentation, continuous object
